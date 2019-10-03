@@ -1,0 +1,12 @@
+{
+  "name": "htonia_bot",
+  "version": "1.0.0",
+  "description": "Testing serverless python-telegram bot",
+  "main": "index.py",
+  "scripts": {
+    "build": "true"
+  },
+  "keywords": ["telegram", "bot", "python"],
+  "author": "Vlaght",
+  "license": "ISC"
+}

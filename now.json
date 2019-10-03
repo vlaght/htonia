@@ -1,0 +1,7 @@
+{
+    "version": 2,
+    "name": "htonia",
+    "builds": [
+        { "src": "index.py", "use": "@now/python" , "config": { "maxLambdaSize": "10mb" } }
+    ]
+}
