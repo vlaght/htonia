@@ -7,8 +7,12 @@ from flask import jsonify
 
 import requests
 
-from cfg import TOKEN
-
+try:
+    from cfg import TOKEN
+except ImportError:
+    raise ImportError(
+        'Create cfg.py and place TOKEN="your_token_goes_here" there'
+    )
 logging.basicConfig(format=logging.BASIC_FORMAT)
 
 logger = logging.getLogger('main')
@@ -22,7 +26,6 @@ app = Flask(__name__)
 @app.route('/', defaults={'path': ''}, methods=['POST', 'GET'])
 @app.route('/<path:path>')
 def catch_all(path):
-    assert TOKEN != "CHANGEME"
     if request.method == 'POST':
         try:
             data = request.json
