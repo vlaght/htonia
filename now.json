@@ -3,5 +3,6 @@
     "name": "htonia",
     "builds": [
         { "src": "index.py", "use": "@now/python" , "config": { "maxLambdaSize": "10mb" } }
-    ]
+    ],
+    "routes": [{"src": "/.*", "dest": "/index.py"}]
 }
