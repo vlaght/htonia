@@ -7,11 +7,11 @@ from handlers import h_comment
 
 try:
     from cfg import TOKEN
-    from cfg import GITLAB_TOKEN
+    from cfg import SECRET_TOKEN
     from cfg import CHAT_ID
 except ImportError:
     raise ImportError(
-        'Create cfg.py and place TOKEN="your_token_goes_here" there'
+        'Create your personal cfg.py'
     )
 
 from flask import Flask
@@ -45,7 +45,7 @@ def resolve(data):
 @app.route('/gitlab', defaults={'path': 'gitlab'}, methods=['POST', 'GET'])
 def gitlab(path):
 
-    if request.headers.get('X-Gitlab-Token') != GITLAB_TOKEN:
+    if request.headers.get('X-Gitlab-Token') != SECRET_TOKEN:
         return jsonify({}), 401
 
     if request.method == 'POST':
@@ -74,9 +74,10 @@ def catch_all(path):
         try:
             data = request.json
             logger.debug('Recieved: %s', data)
+            chat_id = data['message']['chat']['id']
             message = {
                 'chat_id': data['message']['chat']['id'],
-                'text': data['message']['text']+"```{}```".format(data)
+                'text': "chat_id for cfg.py: {}".format(chat_id)
             }
             requests.post(
                 api_url,
