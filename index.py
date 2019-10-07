@@ -1,6 +1,18 @@
 import logging
 
 from handlers import h_push
+from handlers import h_tag_push
+from handlers import h_issue
+from handlers import h_comment
+
+try:
+    from cfg import TOKEN
+    from cfg import GITLAB_TOKEN
+    from cfg import CHAT_ID
+except ImportError:
+    raise ImportError(
+        'Create cfg.py and place TOKEN="your_token_goes_here" there'
+    )
 
 from flask import Flask
 from flask import Response
@@ -9,13 +21,7 @@ from flask import jsonify
 
 import requests
 
-try:
-    from cfg import TOKEN
-    from cfg import GITLAB_TOKEN
-except ImportError:
-    raise ImportError(
-        'Create cfg.py and place TOKEN="your_token_goes_here" there'
-    )
+
 logging.basicConfig(format=logging.BASIC_FORMAT)
 
 logger = logging.getLogger('main')
@@ -24,6 +30,17 @@ logger.setLevel(logging.DEBUG)
 api_url = 'https://api.telegram.org/bot%s/sendMessage' % TOKEN
 
 app = Flask(__name__)
+
+def resolve(data):
+    tp = data['object_kind']
+    handlers = {
+        'push': h_push,
+        'tag_push': h_tag_push,
+        'issue': h_issue,
+        'note': h_comment,
+    }
+    assert tp in handlers.keys(), 'Can`t handle this one yet'
+    return handlers[tp](data)
 
 @app.route('/gitlab', defaults={'path': 'gitlab'}, methods=['POST', 'GET'])
 def gitlab(path):
@@ -35,7 +52,8 @@ def gitlab(path):
         try:
             data = request.json
             logger.debug('Recieved: %s', data)
-            response_data = h_push(data)
+            response_data = resolve(data)
+            response_data['chat_id'] = CHAT_ID
             response = requests.post(
                 api_url,
                 data=response_data,
