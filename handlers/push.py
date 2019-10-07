@@ -1,47 +1,44 @@
+import json
+
+
 def commits_description(commits):
-    template = "Пользователь {} \nсоздал коммит {} с сообщением \n'{}' в {}. \nСсылка на коммит: {}"
+    template = "{idx}. {message} ({author})."
     return '\n'.join(
         [
             template.format(
-                c['author']['name'],
-                c['id'],
-                c['message'],
-                c['timestamp'],
-                c['url']
-            ) for c in commits
+                idx=idx,
+                message=c['message'],
+                author=c['author']['name'],
+            ) for idx, c in enumerate(commits)
         ]
     )
+
 
 def commits_keyboard(commits):
     return {
         "inline_keyboard": [
             [
                 dict(
-                    text=c['message'],
+                    text=idx,
                     url=c['url']
-                ) for c in commits
+                ) for idx, c in enumerate(commits)
             ]
         ]
     }
 
 
 def h_push(data):
-    template = """
-    Проект: {project_name} ({project_web_url})
-    Тип события: push
-    Пользователь: {push_initiator_name} ({push_initiator_username})
-    Коммиты: {commits_description}
-    """
+    template = "Куда: {project_name} ({project_web_url})\nЧто: push в {ref}\nКто: {push_initiator_name} ({push_initiator_username})\nКоммиты: \n{commits_description}"
 
     message = template.format(
         project_name=data['project']['name'],
         project_web_url=data['project']['web_url'],
+        ref=data['ref'],
         push_initiator_name=data['user_name'],
         push_initiator_username=data['user_username'],
         commits_description=commits_description(data['commits']),
     )
     return {
-        'chat_id': 3148864, # chat_id with me
         'text': message,
-        'reply_markup': commits_keyboard(data['commits'])
+        'reply_markup': json.dumps(commits_keyboard(data['commits']))
     }
